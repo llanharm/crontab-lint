@@ -7,6 +7,7 @@ from crontab_lint.explainer import explain
 
 class TestExplainer:
     def _explain(self, expr: str) -> str:
+        """Parse a cron expression and return its human-readable explanation."""
         return explain(parse(expr + " /usr/bin/cmd"))
 
     def test_every_minute(self):
@@ -60,3 +61,17 @@ class TestExplainer:
         assert "every 2 hours" in result
         assert "8" in result
         assert "18" in result
+
+    def test_returns_non_empty_string(self):
+        """Explanation should always return a non-empty string for any valid expression."""
+        expressions = [
+            "* * * * *",
+            "0 0 * * *",
+            "59 23 31 12 6",
+            "*/5 */2 * * *",
+            "0 0 1 1 *",
+        ]
+        for expr in expressions:
+            result = self._explain(expr)
+            assert isinstance(result, str), f"Expected str for {expr!r}, got {type(result)}"
+            assert len(result) > 0, f"Expected non-empty result for {expr!r}"
